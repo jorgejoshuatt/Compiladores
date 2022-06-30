@@ -1,0 +1,9 @@
+if(a>b)
+    if(b<c)
+        a:=5;
+    else
+        b:=5;
+    end
+else
+end
+if)(

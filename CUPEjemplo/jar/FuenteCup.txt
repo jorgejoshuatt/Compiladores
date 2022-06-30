@@ -1,0 +1,104 @@
+package fes.aragon.compilador;
+import java_cup.runtime.*;
+import java.io.*;
+import java.util.*;
+
+action code{:
+	public void imprimirValor(String str){
+		System.out.println("Valor del token es: "+str);
+	}
+:};
+parser code{:
+	public static TablaSimbolos tabla = new TablaSimbolos();
+	public static Lexico lex;
+	public void syntax_error(Symbol st){
+		System.out.println("Error en la linea "+ lex.getYyline() +
+                    " columna: "+ lex.getYy_currentPos());
+	}
+	public void cargar(String archivo,TablaSimbolos t) throws Exception{	
+		lex=new Lexico(new FileInputStream(new File(archivo)),t);
+		new parser(lex).parse();
+	}
+	
+:};
+terminal PUNTOYCOMA, MAS, MENOS, POR, ENTRE;
+terminal UMENOS, LPAREN, RPAREN, PRINT, ASIG;
+terminal MENOR, MENORIGUAL, MAYOR, MAYORIGUAL;
+terminal Datos ID;
+terminal Integer NUMERO;
+
+
+
+non terminal expr_lista,expr_parte;
+non terminal Integer expr,asig;
+
+precedence left MENOS,MAS;
+precedence left ENTRE,POR;
+precedence left MENOR,MENORIGUAL,MAYOR,MAYORIGUAL;
+
+expr_lista ::= expr_lista expr_parte
+		|expr_lista asig PUNTOYCOMA		
+		|expr_parte
+		|error {:;:};
+expr_parte ::=expr:e PUNTOYCOMA
+	{:
+            System.out.println("Resultado es: "+ e);
+            imprimirValor(String.valueOf(e));
+        :};
+asig ::= ID:s ASIG expr:e 
+        {:
+            RESULT=e; 
+            s.setValor(String.valueOf(e));
+	:}
+	|ID:s ASIG asig:e 
+        {:
+            RESULT=e;
+            s.setValor(String.valueOf(e));
+	:};			
+expr ::=expr:e1 MENOS expr:e2 		
+	{:RESULT = new Integer(e1.intValue() - e2.intValue());:}
+	|expr:e1 MAS expr:e2 		
+	{:RESULT = new Integer(e1.intValue() + e2.intValue());:}
+	|expr:e1 ENTRE expr:e2 		
+	{:RESULT = new Integer(e1.intValue() / e2.intValue());:}
+	|expr:e1 POR expr:e2 		
+	{:RESULT = new Integer(e1.intValue() * e2.intValue());:}
+	|expr:e1 MENOR expr:e2
+        {:
+            if(e1.intValue() < e2.intValue()){
+		RESULT = new Integer("1");
+            }else{
+		RESULT = new Integer("0");
+            }
+	:}
+	|expr:e1 MENORIGUAL expr:e2
+	{:
+            if(e1.intValue() <= e2.intValue()){
+		RESULT = new Integer("1");
+            }else{
+		RESULT = new Integer("0");
+            }			 
+	:}
+	|expr:e1 MAYOR expr:e2
+	{:
+            if(e1.intValue() > e2.intValue()){
+		RESULT = new Integer("1");
+            }else{
+		RESULT = new Integer("0");
+            }			 
+	:}
+	|expr:e1 MAYORIGUAL expr:e2
+	{:
+            if(e1.intValue() >= e2.intValue()){
+		RESULT = new Integer("1");
+            }else{
+		RESULT = new Integer("0");
+            }			 
+	:}
+	| ID:s 
+        {:
+            System.out.println("Valor en tabla: "+s.getValor());
+            RESULT=Integer.valueOf(s.getValor());
+        :}
+	| NUMERO:n {:RESULT=n;:}	
+	| LPAREN expr:e RPAREN {:RESULT = e;:};

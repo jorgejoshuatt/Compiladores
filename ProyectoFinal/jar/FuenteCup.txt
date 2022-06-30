@@ -1,0 +1,82 @@
+package fes.aragon.compilador;
+import java_cup.runtime.*;
+import java.io.*;
+import java.util.*;
+
+action code{:
+	public void imprimirValor(String str){
+		System.out.println("Valor del token es: "+str);
+	}
+:};
+parser code{:
+	public static TablaSimbolos tabla = new TablaSimbolos();
+	public static Lexico lex;
+	public void syntax_error(Symbol st){
+		System.out.println("Error en la linea "+ lex.getYyline() +
+                    " columna: "+ lex.getYy_currentPos());
+	}
+	public void cargar(String archivo,TablaSimbolos t) throws Exception{	
+		lex=new Lexico(new FileInputStream(new File(archivo)),t);
+		new parser(lex).parse();
+	}
+	
+:};
+terminal TRUE, FALSE, NOT, AND, OR, LPAREN, RPAREN, ASIG, PUNTOYCOMA;
+terminal Datos ID;
+
+non terminal P,S;
+non terminal Boolean A,E,T,F;
+
+precedence left OR, AND, NOT;
+precedence left LPAREN, RPAREN,PUNTOYCOMA;
+
+P ::= P S
+      |P A PUNTOYCOMA
+      |S
+      |error {:;:};
+S ::=E:b PUNTOYCOMA
+    {:
+            System.out.println("Resultado es: "+ b);
+            imprimirValor(String.valueOf(b));
+        :};
+A ::= ID:s ASIG E:b
+      {:
+            RESULT=b; 
+            s.setValor(String.valueOf(b));
+	:}
+	|ID:s ASIG A:b 
+        {:
+            RESULT=b;
+            s.setValor(String.valueOf(b));
+	:};
+E ::=T:e1 OR E:e2    
+    {:
+    boolean b=(e1 | e2);
+    RESULT = b;:}
+    |T:e
+    {:boolean b=(e);
+    RESULT=b;:};
+    
+    
+T ::=F:e1 AND T:e2  
+    {:
+    boolean b=(e1 && e2);
+    RESULT = b;:}
+    |F:e
+    {:boolean b=(e);
+    RESULT=b;:};
+    
+       
+F ::=NOT F:e
+     {:
+    RESULT =new Boolean(!e.booleanValue());:}
+    |TRUE
+    {:RESULT=true;:}
+    |FALSE
+    {:RESULT=false;:}
+    |ID:s 
+        {:
+            System.out.println("Valor en tabla: "+s.getValor());
+            RESULT=Boolean.valueOf(s.getValor());
+        :}
+    |LPAREN E RPAREN;

@@ -1,0 +1,5 @@
+true or not true or false and not false;
+a:=true;
+b:=false;
+c:=not true;
+d:=a or b or c;
