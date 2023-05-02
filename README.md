@@ -1,4 +1,4 @@
-# Compiladores.
+# Compiladores
 
 Creación de un compilador en clase de Compiladores en la Facultad de Estudios Superiores Aragón.
 
