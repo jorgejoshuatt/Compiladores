@@ -4,9 +4,8 @@ Creación de un compilador en clase de Compiladores en la Facultad de Estudios S
 
 ## Construido con 🛠️
 
-* Java
-* JFlex
-* CUP
+* [Java](https://www.java.com/es/) :hotsprings:
+* [JFlex - CUP](https://www.jflex.de)
 
 ## Autores ✒️
 
